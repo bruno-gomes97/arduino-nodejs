@@ -201,6 +201,12 @@ void loop() {
 
 Você precisará montar o seguinte circuito usando seu Arduino:
 
+<img src="https://github.com/bruno-gomes97/arduino-nodejs/blob/main/img/prot_tinkercad.png" alt="Imagem prototipo">
+
+> <p>Visualize o circuito no Tinkercad:</p>
+> <p>https://www.tinkercad.com/things/5a78ONb0fTA-sistema-de-comunicacao-de-emergencia/editel</p>
+
+
 <hr>
 
 ## 🛠️ Construído com
