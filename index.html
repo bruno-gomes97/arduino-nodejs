@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlertNet Solution</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+</head>
+<style>
+    body,
+    html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        text-align: center;
+        background-color: #90bfde;
+    }
+
+    #nivelAgua {
+        background-color: #fff;
+        font-size: 20px;
+        font-weight: bold;
+        width: 100px;
+        height: 30px;
+        margin: 0 auto;
+        padding: 1rem;
+        border-radius: 5px;
+    }
+
+    #contato {
+        background-color: #fff;
+        width: 30%;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 10px auto;
+    }
+
+    #contato ul li {
+        list-style: none;
+        font-size: 18px;
+        margin: 5px 0;
+        font-weight: bold;
+    }
+</style>
+<body>
+    <header>
+        <div id="logo">
+            <img src="logo.jpg" alt="Imagem logo empresa">
+        </div>
+    </header>
+
+    <h1>NÍVEL DA ÁGUA EM TEMPO REAL:</h1>
+
+    <div id="nivelAgua"></div>
+
+    <section id="contato">
+        <h2>CONTATOS</h2>
+        <h3>Serviços de Urgência</h3>
+        <ul>
+            <li>Polícia Militar: 190</li>
+            <li>Corpo de Bombeiros: 193</li>
+            <li>Serviço de Atendimento Móvel de Urgência: 192</li>
+            <li>Defesa civíl: 190</li>
+        </ul>
+    </section>
+</body>
+<script>
+    const socket = io();
+
+    socket.on('data', function (data) {
+        console.log(data);
+
+        document.getElementById('nivelAgua').innerHTML = data;
+
+        if(data > 30) {
+            document.getElementById('nivelAgua').style.background = 'red';
+        }
+
+        if(data < 30) {
+            document.getElementById('nivelAgua').style.background = 'white';
+        }
+    })
+</script>
+
+</html>
