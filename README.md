@@ -36,6 +36,7 @@ Criar um arquivo chamado `index.html`
         overflow: hidden;
         text-align: center;
         background-color: #90bfde;
+        font-family: Arial, Helvetica, sans-serif
     }
 
     #nivelAgua {
@@ -63,6 +64,36 @@ Criar um arquivo chamado `index.html`
         margin: 5px 0;
         font-weight: bold;
     }
+
+    form {
+        width: 13%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        text-align: start;
+    }
+
+    form label {
+        font-size: 18px;
+    }
+
+    form input {
+        padding: 10px;
+        border-radius: 5px;
+        border: none;
+    }
+
+    form button {
+        padding: 10px;
+        font-weight: bold;
+        font-size: 18px;
+        border: 2px solid #90bfde;
+        border-radius: 5px;
+        background-color: #fff;
+        color: #000;
+        cursor: pointer;
+    }
 </style>
 <body>
     <header>
@@ -85,9 +116,45 @@ Criar um arquivo chamado `index.html`
             <li>Defesa civíl: 190</li>
         </ul>
     </section>
+
+    <h2>Cadastre seu número aqui para receber as notificações:</h2>
+    <form action="/formulario" method="post" id="form">
+        <label for="name">Nome:</label>
+        <input type="text" id="name" name="name" placeholder="Digite seu nome">
+        <label for="phone">Telefone:</label>
+        <input type="text" id="phone" name="phone" placeholder="Digite seu telefone">
+        <button type="submit">Enviar</button>
+    </form>
 </body>
 <script>
     const socket = io();
+    const form = document.getElementById("form");
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch('/formulario', {
+            method: 'POST',
+            body: JSON.stringify(Object.fromEntries(formData)),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    form.reset(); // Limpa os campos do formulário
+                } else {
+                    alert('Erro ao salvar os dados: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Erro ao enviar o formulário: ' + error.message);
+            });
+    })
 
     socket.on('data', function (data) {
         console.log(data);
@@ -129,13 +196,64 @@ const fs = require('fs');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const socketIo = require('socket.io');
+const bodyParser = require('body-parser');
+const path = require('path');
+const mongoose = require('mongoose');
 
 // Cria uma instância do Express
 const app = express();
 
+//configurando o middleware body-parser para analisar dados do formulario HTML
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Conectando ao banco de dados MongoDB
+mongoose.connect('mongodb://127.0.0.1:27017/projeto_IOT');
+const conexao = mongoose.connection;
+
+conexao.on('error', console.error.bind(console, 'Erro de conexão com o MongoDB:'));
+conexao.once('open', () => {
+    console.log('Conectado ao banco de dados MongoDB');
+});
+
+// Definindo o schema e o modelo para os documentos de clientes
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    phone: { type: String, required: true }
+})
+
+const User = mongoose.model('User', userSchema);
+
+// Configuração para servir arquivos estáticos
+app.use(express.static(path.join(__dirname, 'server')));
+
 // Servir o arquivo index.html
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
+});
+
+// Rota para processar o formulário via AJAX
+app.post('/formulario', async (req, res) => {
+    try {
+      const { name, phone } = req.body;
+      const newUser = new User({ name, phone });
+      const savedUser = await newUser.save();
+      res.json({ success: true, message: `Usuário ${savedUser.name} cadastrado com sucesso!` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+//rota para lidar com o envio do formulario
+app.post('/formulario'), (req, res) => {
+    const name = req.body.name;
+    const phone = req.body.phone;
+    res.send(`Usuário: ${name}, phone: ${phone}`)
+}
+
+// Rota para o caminho raiz
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html'); // Envia o arquivo HTML
 });
 
 // Cria o servidor HTTP
@@ -162,6 +280,7 @@ io.on('connection', (socket) => {
 server.listen(3000, () => {
     console.log('Servidor rodando na porta 3000');
 });
+
 
 ```
 O código acima escuta uma mensagem do Arduino através da porta USB e então envia uma mensagem para o HTML/JavaScript usando Socket.io.
@@ -216,4 +335,5 @@ Você precisará montar o seguinte circuito usando seu Arduino:
 * [Arduino IDE](https://https://www.arduino.cc/en/software) 
 * [Nodejs](https://https://nodejs.org/pt)
 * [SerialPort NPM](https://https://www.npmjs.com/package/serialport)
-* [Socket.io](https://https://(https://socket.io/)) 
+* [Socket.io](https://https://(https://socket.io/))
+* [MongoDB Compass](https://www.mongodb.com/products/tools/compass)
