@@ -1,6 +1,6 @@
 # Sistema de Comunicação de Emergência
 
-Para enfrentar este problema de comunicação e alerta, desenvolvemos um sistema de comunicação de emergência inovador. Este sistema utiliza sensores para monitorar o nível da água em áreas propensas a enchentes. Quando o nível da água atinge um ponto crítico, uma mensagem de alerta é imediatamente enviada aos moradores cadastrados através de um aplicativo. Dentro do aplicativo estará infomações como: nível da água em tempo real e números de emergência.
+Este projeto visa desenvolver um sistema de comunicação de emergência utilizando um Arduino, sensor ultrassônico e um display LCD. O sensor ultrassônico é utilizado para captar o nível de água em tempo real e enviar esses dados para um aplicativo móvel, permitindo que a população acompanhe o nível da água remotamente.
 
 <hr>
 
