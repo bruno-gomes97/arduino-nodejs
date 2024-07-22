@@ -1,12 +1,15 @@
 const express = require('express');
 const http = require('http');
-const fs = require('fs');
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
+const accountSid = CONTA_SID;
+const authToken = TOKEN_AUTENT;
+
+const client = require('twilio')(accountSid, authToken);
 
 // Cria uma instância do Express
 const app = express();
@@ -43,21 +46,14 @@ app.get('/', (req, res) => {
 // Rota para processar o formulário via AJAX
 app.post('/formulario', async (req, res) => {
     try {
-      const { name, phone } = req.body;
-      const newUser = new User({ name, phone });
-      const savedUser = await newUser.save();
-      res.json({ success: true, message: `Usuário ${savedUser.name} cadastrado com sucesso!` });
+        const { name, phone } = req.body;
+        const newUser = new User({ name, phone });
+        const savedUser = await newUser.save();
+        res.json({ success: true, message: `Usuário ${savedUser.name} cadastrado com sucesso!` });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-  });
-
-//rota para lidar com o envio do formulario
-app.post('/formulario'), (req, res) => {
-    const name = req.body.name;
-    const phone = req.body.phone;
-    res.send(`Usuário: ${name}, phone: ${phone}`)
-}
+});
 
 // Rota para o caminho raiz
 app.get('/', (req, res) => {
@@ -74,6 +70,8 @@ const io = socketIo(server);
 const port = new SerialPort({ path: 'COM5', baudRate: 9600 });
 const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
+let alertEnviado = false;
+
 io.on('connection', (socket) => {
     console.log('Node.js is listening');
 
@@ -81,6 +79,34 @@ io.on('connection', (socket) => {
     parser.on('data', (data) => {
         console.log(data);
         socket.emit('data', data);
+
+        if (data < 0.50 && !alertEnviado) {
+            async function sendSMS(to, from, body) {
+                try {
+                    if (!body) {
+                        throw new Error('O corpo da mensagem é obrigatório.');
+                    }
+
+                    const message = await client.messages.create({
+                        body: body,
+                        from: from,
+                        to: to
+                    });
+                    console.log(message.sid);
+                } catch (error) {
+                    console.error('RestException [Error]:', error);
+                }
+            }
+            
+            // enviar a mensagem de alerta
+            sendSMS(NUMERO_CEL, NUMERO_TWILIO, 'ALERTA DE ENCHENTE!')
+            alertEnviado = true;
+
+            // Redefinir o estado do alerta após 5 minutos
+            setTimeout(() => {
+                alertEnviado = false;
+            }, 300000); // 300000 milissegundos = 5 minutos
+        }
     });
 });
 
