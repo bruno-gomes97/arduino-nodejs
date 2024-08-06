@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
         console.log(data);
         socket.emit('data', data);
 
-        if (data < 0.50 && !alertEnviado) {
+        if (data < 10 && !alertEnviado) {
             async function sendSMS(to, from, body) {
                 try {
                     if (!body) {
@@ -97,9 +97,18 @@ io.on('connection', (socket) => {
                     console.error('RestException [Error]:', error);
                 }
             }
+
+            // instanciar objeto Date() para adicionar dia e hora
+            const data = new Date();
+            const dia = data.getDate();
+            const mes = data.getMonth() + 1;
+            const ano = data.getFullYear();
+            const hora = data.getHours();
+            const minuto = data.getMinutes() > 10 ? Number(`0${data.getMinutes()}`) : data.getMinutes();
             
             // enviar a mensagem de alerta
-            sendSMS(NUMERO_CEL, NUMERO_TWILIO, 'ALERTA DE ENCHENTE!')
+            sendSMS(NUM_CEL, NUM_TWILIO, `ALERTA DE ENCHENTE!\nÚltima atualização: ${dia}/${mes}/${ano} - ${hora}:${minuto}`);
+
             alertEnviado = true;
 
             // Redefinir o estado do alerta após 5 minutos

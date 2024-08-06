@@ -130,16 +130,16 @@
             });
     })
 
-    socket.on('data', function (data) {
-        console.log(data);
+    socket.on('data', function (nivelDaAgua) {
+        console.log(nivelDaAgua);
 
-        document.getElementById('nivelAgua').innerHTML = data;
+        document.getElementById('nivelAgua').innerHTML = nivelDaAgua;
 
-        if (data < 0.50) {
+        if (nivelDaAgua < 10) {
             document.getElementById('nivelAgua').style.background = 'red';
         }
 
-        if (data > 0.50) {
+        if (nivelDaAgua > 10) {
             document.getElementById('nivelAgua').style.background = 'white';
         }
     })
