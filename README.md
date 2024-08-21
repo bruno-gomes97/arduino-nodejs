@@ -103,3 +103,4 @@ Você precisará montar o seguinte circuito usando seu Arduino:
 * [SerialPort NPM](https://https://www.npmjs.com/package/serialport)
 * [Socket.io](https://https://(https://socket.io/))
 * [MongoDB Compass](https://www.mongodb.com/products/tools/compass)
+* [Twilio](https://www.twilio.com/pt-br/messaging/channels/whatsapp)
